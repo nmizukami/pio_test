@@ -1,0 +1,20 @@
+Resetting modules to system default
+tset: standard error: Inappropriate ioctl for device
+
+stty: standard input: Inappropriate ioctl for device
+Restoring modules from user's naoki_casper, for system: "dav"
+
+Currently Loaded Modules:
+  1) ncarenv/1.2           5) openmpi/3.1.2         9) nco/4.7.4
+  2) gnu/7.3.0             6) slurm/17             10) ncview/2.1.7
+  3) ncarcompilers/0.4.1   7) cdo/1.9.3
+  4) netcdf/4.6.1          8) google-chrome/1.0.0
+
+ 
+
+Running: ../bin/PIOtest.exe; sleep 1  - Please wait...
+Used memory in task 3: 1386.94MiB (+3.81MiB overhead). ExitStatus: 0. Signal: 0
+Used memory in task 0: 1386.97MiB (+3.81MiB overhead). ExitStatus: 0. Signal: 0
+Used memory in task 2: 1386.97MiB (+3.81MiB overhead). ExitStatus: 0. Signal: 0
+Used memory in task 4: 1386.98MiB (+3.81MiB overhead). ExitStatus: 0. Signal: 0
+Used memory in task 1: 1386.96MiB (+3.81MiB overhead). ExitStatus: 0. Signal: 0

@@ -1,0 +1,203 @@
+#========================================================================
+# Makefile to compile the routing model
+#========================================================================
+#
+#
+#
+#========================================================================
+# PART 0: User configure part 
+#========================================================================
+# Define fortran compiler - gfortran, ifort or pgf90
+FC  = gfortran
+
+# Define the compiler exe
+FC_EXE = mpif90
+
+# define open MP flags (yes if used)
+isOpenMP =
+FLAGS_OMP =
+LIBOPENMP =
+
+# define if should use external librarys (yes if used)
+# external librarys are: mpi-serial, Parallel-I/O, and GPTL timing library
+# define path to PNETCDF if you want to use it
+isMPISERIAL =
+isPIO = yes
+isGPTL = 
+
+# casper    /glade/u/apps/dav/opt/pnetcdf/1.9.0/openmpi/3.1.0/gnu/7.3.0/
+# cheyenne  /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/gnu/8.3.0/ 
+PNETCDF_PATH = 
+
+# If isPIO==yes then you can give hints to PIO about the local system
+# gpfs is the specific filesystem used on cheyenne
+# (can be gpfs or lustre) Only use it if you know for sure about your filesystem.
+# If not make this setting blank
+PIO_FILESYSTEM_HINTS = gpfs
+
+# Define core directory below which everything resides
+# parent directory of the 'build' directory
+# do not put space at the end of path
+F_MASTER = $(HOME)/testing/pio_test/route/
+#F_MASTER = /glade/u/home/mizukami/testing/pio_test/route/
+
+# Define the NetCDF libraries and path to include files
+ifeq "$(FC)" "gfortran"
+  # casper:   /glade/u/apps/ch/opt/netcdf/4.6.1/gnu/7.3.0
+  # cheyenne: /glade/u/apps/ch/opt/netcdf/4.6.3/gnu/8.3.0
+  NCDF_PATH = /glade/u/apps/ch/opt/netcdf/4.6.1/gnu/7.3.0
+endif
+ifeq "$(FC)" "ifort"
+  NCDF_PATH = /glade/u/apps/ch/opt/netcdf/4.6.3/intel/17.0.1
+endif
+ifeq "$(FC)" "pgf90"
+ NCDF_PATH = 
+endif
+
+LIBNETCDF = -Wl,-rpath,$(NCDF_PATH)/lib \
+            -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf
+INCNETCDF = -I$(NCDF_PATH)/include
+
+ifeq "$(isOpenMP)" "yes"
+ FLAGS_OMP = -fopenmp
+endif
+
+
+# Define flags
+ifeq "$(FC)" "gfortran"
+ FLAGS = -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds $(FLAGS_OMP)
+ FLAGS1 = -O3 -ffree-line-length-none -fmax-errors=0 $(FLAGS_OMP)
+endif
+ifeq "$(FC)" "ifort"
+ FLAGS1 = -p -g -debug -warn all -check all -noerror_limit -FR -O0 -auto -WB -fpe0 -traceback -fltconsistency $(FLAGS_OMP)
+ FLAGS = -O3 -FR -auto -fltconsistency -fpe0 $(FLAGS_OMP)
+endif
+ifeq "$(FC)" "pgf90"
+ FLAGS1 = -Bstatic -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv -Mprof=lines,time
+ FLAGS = -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv
+endif
+
+#========================================================================
+# PART 1: Define directory paths
+#========================================================================
+# Core directory that contains source code
+F_KORE_DIR = $(F_MASTER)build/src/
+
+# Location of the compiled modules
+MOD_PATH = $(F_MASTER)build/
+
+# Define the directory for the executables
+EXE_PATH = $(F_MASTER)bin
+
+# External libraries (if used)
+EXTLIBS =
+EXTINCLUDES =
+
+#========================================================================
+# PART 2: Assemble all of the sub-routines
+#========================================================================
+# Define subroutines
+SUB = \
+    nrtype.f90 \
+    globalData.f90 \
+    nr_utility.f90 \
+    mpi_utils.f90 \
+    pio_utils.f90 
+
+# concatanate model subroutines
+TEMP_MODSUB = $(SUB)
+
+# insert appropriate directory name
+MODSUB = $(patsubst %, $(F_KORE_DIR)%, $(TEMP_MODSUB))
+
+#========================================================================
+# PART 3: Define driver programs, and executables
+#========================================================================
+# Define the driver routine
+DRIVER = $(F_KORE_DIR)main.f90
+
+# Define the executable
+EXE = PIOtest.exe
+
+# tasks
+all: compile install clean
+
+#========================================================================
+# PART 3.5: External libaries that might need to be built
+#========================================================================
+LIBDIR       = $(F_MASTER)build/lib
+PIOLIBDIR    = $(LIBDIR)/piolib/lib
+PIOINCDIR    = $(LIBDIR)/piolib/include
+PIOLIB       = $(PIOLIBDIR)/libpiof.a $(PIOLIBDIR)/libpioc.a
+MPISERLIBDIR = $(LIBDIR)/mpi-seriallib
+MPISERLIB    = $(MPISERLIBDIR)/libmpi-serial.a
+
+ifeq "$(isMPISERIAL)" "yes"
+  EXTINCLUDES += -I$(MPISERLIBDIR)
+  EXTLIBS += $(MPISERLIB)
+  LDFLAGS += -L$(MPISERLIBDIR) -lmpi-serial
+  ifdef PNETCDF_PATH
+    undefine PNETCDF_PATH
+  endif
+  MPISERIAL = $(MPISERLIB)
+else
+  MPISERIAL = 
+endif
+
+ifeq "$(isPIO)" "yes"
+  EXTINCLUDES += -I$(PIOINCDIR)
+  EXTLIBS += $(PIOLIB)
+  LDFLAGS += -L$(PIOLIBDIR) -lpiof -lpioc
+
+  ifeq "$(isGPTL)" "yes"
+     LDFLAGS += -lgptl
+  endif
+endif
+
+ifdef PNETCDF_PATH
+        LDFLAGS    += -L$(PNETCDF_PATH)/lib -lpnetcdf
+endif
+
+$(PIOLIB): $(MPISERIAL)
+	cd $(LIBDIR); \
+	$(MAKE) $(MFLAGS) F_MASTER=$(F_MASTER) FC=$(FC) FC_EXE=$(FC_EXE) FLAGS="$(FLAGS)" \
+	PIO_FILESYSTEM_HINTS=$(PIO_FILESYSTEM_HINTS) PNETCDF_PATH=$(PNETCDF_PATH) isPIO=yes isGPTL=$(isGPTL) \
+	MPIINC_PATHLIST=$(CPATH) NCDF_PATH=$(NCDF_PATH) $(PIOLIB)
+
+$(MPISERLIB):
+	cd $(LIBDIR); \
+	$(MAKE) $(MFLAGS) F_MASTER=$(F_MASTER) FC=$(FC) FC_EXE=$(FC_EXE) FLAGS="$(FLAGS)" isMPISERIAL=yes $(MPISERLIB)
+
+# Clean external libs
+cleanlibs: cleanpiolib cleanmpiseriallib
+	@echo "Clean the pio and mpi-serial external libraries"
+.PHONY : cleanlibs
+
+cleanpiolib:
+	cd $(LIBDIR); \
+	$(MAKE) $(MFLAGS) F_MASTER=$(F_MASTER) cleanpiolib
+.PHONY : cleanpiolib
+
+cleanmpiseriallib:
+	cd $(LIBDIR); \
+	$(MAKE) $(MFLAGS) F_MASTER=$(F_MASTER) cleanmpiseriallib
+.PHONY : cleanmpiseriallib
+
+#========================================================================
+# PART 4: Compile the puppy
+#========================================================================
+# compile
+compile: $(EXTLIBS)
+	$(FC_EXE) $(FLAGS) $(EXTINCLUDES) $(MODSUB) $(DRIVER) \
+	$(LIBNETCDF) $(INCNETCDF) $(LDFLAGS) -o $(EXE)
+
+# Remove object files
+clean:
+						rm -f *.o
+						rm -f *.mod
+						rm -f *__genmod.f90
+#
+# Copy the executable to the bin directory
+install:
+	@mkdir -p $(EXE_PATH)
+	@mv $(EXE) $(EXE_PATH)

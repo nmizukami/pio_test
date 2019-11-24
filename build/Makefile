@@ -17,12 +17,13 @@ FC  =
 FC_EXE =
 
 # Define the executable
-EXE =
+EXE = pio_test.exe
+
 # define if should use external librarys (yes if used)
 # external librarys are: mpi-serial, Parallel-I/O, and GPTL timing library
 # define path to PNETCDF if you want to use it
 isMPISERIAL =
-isPIO =
+isPIO = yes
 isGPTL =
 
 # If isPIO==yes then you can give hints to PIO about the local system

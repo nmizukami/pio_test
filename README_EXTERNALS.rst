@@ -9,9 +9,9 @@ To obtain the mizuRoute code and the optional externals you need to do the follo
 
 #. Clone the repository. ::
 
-      git clone https://github.com/NCAR/mizuRoute.git my_mizuRoute_sandbox
+      git clone https://github.com/nmizukami/pio_test.git my_pio_test
 
-   This will create a directory ``my_mizuRoute_sandbox/`` in your current working directory.
+   This will create a directory ``my_pio_test/`` in your current working directory.
 
 #. Run the script **manage_externals/checkout_externals**. ::
 
@@ -24,7 +24,7 @@ To obtain the mizuRoute code and the optional externals you need to do the follo
    NOTE: This second step is only required if you are going to use
    one of the external libraries in the mizuRoute build (currently either mpi-serial, or pio).
 
-At this point you have a working version of the full mizuRoute and all optional libraries.
+At this point you have a working version of the full pio_test and all optional libraries.
 
 More details on checkout_externals
 ----------------------------------
@@ -38,7 +38,7 @@ exactly match the externals description. If
 you manually modify an external without updating Externals.cfg, e.g. switch
 to a different tag, then rerunning checkout_externals will switch you
 back to the external described in Externals.cfg. See below
-documentation `Customizing your mizuRoute sandbox`_ for more details.
+documentation `Customizing your pio_test`_ for more details.
 
 **You need to rerun checkout_externals whenever Externals.cfg has
 changed** (unless you have already manually updated the relevant
@@ -53,21 +53,21 @@ when this is needed are:
 **checkout_externals** must be run from the root of the source
 tree. For example, if you cloned mizuRoute with::
 
-  git clone https://github.com/NCAR/mizuRoute.git my_mizuRoute_sandbox
+  git clone https://github.com/nmizukami/pio_test.git my_pio_test
 
 then you must run **checkout_externals** from
-``/path/to/my_mizuRoute_sandbox``.
+``/path/to/my_pio_test``.
 
 To see more details of **checkout_externals**, issue ::
 
   ./manage_externals/checkout_externals --help
 
-Customizing your mizuRoute sandbox
+Customizing your pio_test
 ==================================
 
 There are several use cases to consider when you want to customize or modify your mizuRoute sandbox.
 
-Switching to a different mizuRoute branch or tag
+Switching to a different pio_test branch or tag
 -------------------------------------------
 
 If you have already checked out a branch or tag and **HAVE NOT MADE ANY

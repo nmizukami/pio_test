@@ -11,6 +11,7 @@
 export TMPDIR=/glade/scratch/$USER/temp
 mkdir -p $TMPDIR
 
+module load gnu
 module load peak_memusage
 
 ### Run program

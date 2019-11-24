@@ -32,6 +32,9 @@
 *.app
 
 # other files
+*.err
+*.out
+*.nc
 *.local
 *bak*
 *tmp*
@@ -54,11 +57,11 @@ manage_externals.log
 cime/
 
 # External library build artifacts
-route/build/lib/mpi-seriallib/*.h
-route/build/lib/mpi-seriallib/Makefile*
+build/lib/mpi-seriallib/*.h
+build/lib/mpi-seriallib/Makefile*
 
-route/build/lib/piolib/Makefile*
-route/build/lib/piolib/config.h
-route/build/lib/piolib/doc
-route/build/lib/piolib/src
+build/lib/piolib/Makefile*
+build/lib/piolib/config.h
+build/lib/piolib/doc
+build/lib/piolib/src
 

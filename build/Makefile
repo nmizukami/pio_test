@@ -2,30 +2,28 @@
 # Makefile to compile the routing model
 #========================================================================
 #
-#
+# Need to edit FC, FC_EXE, EXE, F_MASTER, NCDF_PATH or PNCDF_PATH (if used)
+# Feel free to modify compiler flag (FLAGS)
+# Do not leave space after your edits
 #
 #========================================================================
-# PART 0: User configure part 
+# User configure part
 #========================================================================
-# Define fortran compiler - gfortran, ifort or pgf90
+# Define fortran compiler - gnu, intel or pgi
 FC  =
 
 # Define the compiler exe
+# For MPI use, mpifort, mpif77, mpif90, mpif08
 FC_EXE =
 
-# define open MP flags (yes if used)
-isOpenMP =
-FLAGS_OMP =
-LIBOPENMP =
-
+# Define the executable
+EXE =
 # define if should use external librarys (yes if used)
 # external librarys are: mpi-serial, Parallel-I/O, and GPTL timing library
 # define path to PNETCDF if you want to use it
 isMPISERIAL =
 isPIO =
-isGPTL = 
- 
-PNETCDF_PATH =
+isGPTL =
 
 # If isPIO==yes then you can give hints to PIO about the local system
 # gpfs is the specific filesystem used on cheyenne
@@ -39,48 +37,58 @@ PIO_FILESYSTEM_HINTS = gpfs
 F_MASTER =
 
 # Define the NetCDF libraries and path to include files
-ifeq "$(FC)" "gfortran"
-  NCDF_PATH = 
-  LIBNETCDF = -Wl,-rpath,$(NCDF_PATH)/lib \
-              -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf
-  INCNETCDF = -I$(NCDF_PATH)/include
-  ifeq "$(isOpenMP)" "yes"
-   FLAGS_OMP = -fopenmp
-  endif
+
+# pnetcdf location on cheyenne
+#  gnu   mpt:      /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/gnu/8.3.0
+#  gnu   openmpi:  /glade/u/apps/ch/opt/pnetcdf/1.11.1/openmpi/3.1.4/gnu/8.3.0
+#  intel mpt:      /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/intel/18.0.5
+#  intel opnempi:  /glade/u/apps/ch/opt/pnetcdf/1.11.1/openmpi/3.1.4/intel/18.0.5
+#  pgi   mpt:      /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/pgi/19.3
+#  pgi   opnempi:  /glade/u/apps/ch/opt/pnetcdf/1.11.1/openmpi/3.1.4/pgi/19.3
+
+# netcdf location on cheyenne
+#  gnu:   /glade/u/apps/ch/opt/netcdf/4.6.3/gnu/8.3.0
+#  intel: /glade/u/apps/ch/opt/netcdf/4.6.3/intel/18.0.5
+#  pgi:   /glade/u/apps/ch/opt/netcdf/4.6.3/pgi/19.3
+
+# netcdf location on casper
+# gnu:   /glade/u/apps/ch/opt/netcdf/4.6.1/gnu/7.3.0
+
+ifeq "$(FC)" "gnu"
+ NCDF_PATH = /glade/u/apps/ch/opt/netcdf/4.6.3/gnu/8.3.0
+ PNETCDF_PATH = /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/gnu/8.3.0
+endif
+ifeq "$(FC)" "intel"
+ NCDF_PATH = /glade/u/apps/ch/opt/netcdf/4.6.3/intel/18.0.5
+ PNETCDF_PATH = /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/intel/18.0.5
+endif
+ifeq "$(FC)" "pgi"
+ NCDF_PATH = /glade/u/apps/ch/opt/netcdf/4.6.3/pgi/19.3
+ PNETCDF_PATH = /glade/u/apps/ch/opt/pnetcdf/1.11.1/mpt/2.19/pgi/19.3
 endif
 
-ifeq "$(FC)" "ifort"
-  NCDF_PATH = 
-  LIBNETCDF = -Wl,-rpath,$(NCDF_PATH)/lib \
-		          -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf
-  INCNETCDF = -I$(NCDF_PATH)/include
-  ifeq "$(isOpenMP)" "yes"
-   FLAGS_OMP = -fopenmp
-  endif
-endif
+LIBNETCDF = -Wl,-rpath,$(NCDF_PATH)/lib \
+            -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf
+INCNETCDF = -I$(NCDF_PATH)/include
 
-ifeq "$(FC)" "pgf90"
- NCDF_PATH = 
- LIBNETCDF = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf
- INCNETCDF = -I$(NCDF_PATH)/include
-endif
 
+#========================================================================
 # Define flags
-ifeq "$(FC)" "gfortran"
- FLAGS = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=all $(FLAGS_OMP)
- FLAGS1 = -O3 -ffree-line-length-none -fmax-errors=0 $(FLAGS_OMP)
+#========================================================================
+ifeq "$(FC)" "gnu"
+    FLAGS = -g -Wall -fmax-errors=0 -fbacktrace -fcheck=all -ffpe-trap=zero -ffree-line-length-none $(FLAGS_OMP)
 endif
-ifeq "$(FC)" "ifort"
- FLAGS1 = -p -g -debug -warn all -check all -noerror_limit -FR -O0 -auto -WB -fpe0 -traceback -fltconsistency $(FLAGS_OMP)
- FLAGS = -O3 -FR -auto -fltconsistency -fpe0 $(FLAGS_OMP)
+
+ifeq "$(FC)" "intel"
+    FLAGS = -g -debug all -warn all -check all -FR -O0 -auto -WB -fpe0 -traceback -fltconsistency $(FLAGS_OMP)
 endif
-ifeq "$(FC)" "pgf90"
- FLAGS1 = -Bstatic -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv -Mprof=lines,time
- FLAGS = -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv
+
+ifeq "$(FC)" "pgi"
+    FLAGS = -g -traceback -Mbounds -Mlist -Minfo -Mdclchk $(FLAGS_OMP)
 endif
 
 #========================================================================
-# PART 1: Define directory paths
+# Define directory paths
 #========================================================================
 # Core directory that contains source code
 F_KORE_DIR = $(F_MASTER)build/src/
@@ -96,82 +104,33 @@ EXTLIBS =
 EXTINCLUDES =
 
 #========================================================================
-# PART 2: Assemble all of the sub-routines
+# Assemble all of the sub-routines
 #========================================================================
 # Define subroutines
-#
-# data types
-DATATYPES = \
+SUB = \
     nrtype.f90 \
-    public_var.f90 \
-    dataTypes.f90 \
-    var_lookup.f90 \
     globalData.f90 \
-    popMetadat.f90 \
-    allocation.f90 
-#
-# define utilities
-UTILS = \
     nr_utility.f90 \
-    ascii_util.f90 \
-    time_utils.f90 \
     mpi_utils.f90 \
-    gamma_func.f90
-#
-# read/write files
-IO = \
-    remap.f90 \
-    read_control.f90 \
-    read_param.f90 \
-    read_netcdf.f90 \
-    write_netcdf.f90 \
-    read_streamSeg.f90 \
-    write_streamSeg.f90 \
-    read_runoff.f90 \
-    get_basin_runoff.f90 \
-    read_remap.f90 \
-    read_restart.f90 \
-    write_restart.f90 \
-    write_simoutput.f90
-
-INITIAL = \
-    process_time.f90 \
-    network_topo.f90 \
-    process_param.f90 \
-    process_ntopo.f90 \
-    pfafstetter.f90 \
-    domain_decomposition.f90
-
-# perform model routing
-QROUTE = \
-    accum_runoff.f90 \
-    basinUH.f90 \
-    irf_route.f90 \
-    kwt_route.f90 \
-    main_route.f90 \
-    mpi_process.f90 \
-    model_setup.f90
+    pio_utils.f90
 
 # concatanate model subroutines
-TEMP_MODSUB = $(DATATYPES) $(UTILS) $(IO) $(INITIAL) $(QROUTE)
+TEMP_MODSUB = $(SUB)
 
 # insert appropriate directory name
 MODSUB = $(patsubst %, $(F_KORE_DIR)%, $(TEMP_MODSUB))
 
 #========================================================================
-# PART 3: Define driver programs, and executables
+# Define driver programs
 #========================================================================
 # Define the driver routine
-DRIVER = $(F_KORE_DIR)route_runoff.f90
-
-# Define the executable
-EXE = 
+DRIVER = $(F_KORE_DIR)main.f90
 
 # tasks
 all: compile install clean
 
 #========================================================================
-# PART 3.5: External libaries that might need to be built
+# External libaries that might need to be built
 #========================================================================
 LIBDIR       = $(F_MASTER)build/lib
 PIOLIBDIR    = $(LIBDIR)/piolib/lib
@@ -189,7 +148,7 @@ ifeq "$(isMPISERIAL)" "yes"
   endif
   MPISERIAL = $(MPISERLIB)
 else
-  MPISERIAL = 
+  MPISERIAL =
 endif
 
 ifeq "$(isPIO)" "yes"
@@ -232,7 +191,7 @@ cleanmpiseriallib:
 .PHONY : cleanmpiseriallib
 
 #========================================================================
-# PART 4: Compile the puppy
+# Compile the puppy
 #========================================================================
 # compile
 compile: $(EXTLIBS)
@@ -242,6 +201,7 @@ compile: $(EXTLIBS)
 # Remove object files
 clean:
 						rm -f *.o
+						rm -f *.lst
 						rm -f *.mod
 						rm -f *__genmod.f90
 #

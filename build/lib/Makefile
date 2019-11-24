@@ -11,7 +11,7 @@
 # Library definitions
 #=-====================================
 CPPDEFS      = -DUSE_MPI_ISEND_FOR_FC
-CIMEROOT     = $(F_MASTER)../cime
+CIMEROOT     = $(F_MASTER)/cime
 MCTDIR       = $(CIMEROOT)/src/externals/mct
 MPISERIALDIR = $(MCTDIR)/mpi-serial
 PIO2DIR      = $(CIMEROOT)/src/externals/pio2
@@ -61,7 +61,7 @@ else
   MPIINC   = $(subst :, -I,$(MPIINC_PATHLIST))
   INCLDIR += -I$(MPIINC)
   CPPDEFS += -DHAVE_MPI
-  MPISERIAL = 
+  MPISERIAL =
 endif
 
 ifeq "$(isGPTL)" "yes"

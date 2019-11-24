@@ -1,11 +1,7 @@
 Obtaining optional external libraries that can be used with pio_test
 =====================================================================
 
-mizuRoute is obtained via github. And optionally there are some external libraries
-that can be used with it. These libraries are obtained by r
-
-
-To obtain the mizuRoute code and the optional externals you need to do the following:
+To obtain the pio_test code and the optional externals you need to do the following:
 
 #. Clone the repository. ::
 
@@ -18,18 +14,18 @@ To obtain the mizuRoute code and the optional externals you need to do the follo
       ./manage_externals/checkout_externals
 
    The **checkout_externals** script is a package manager that will
-   populate the mizuRoute directory with the CIME infrastructure code that can
+   populate the pio_test directory with the CIME infrastructure code that can
    then be used. 
 
    NOTE: This second step is only required if you are going to use
-   one of the external libraries in the mizuRoute build (currently either mpi-serial, or pio).
+   one of the external libraries in the pio_test build (currently either mpi-serial, or pio).
 
 At this point you have a working version of the full pio_test and all optional libraries.
 
 More details on checkout_externals
 ----------------------------------
 
-The file **Externals.cfg** in your top-level mizuRoute directory tells
+The file **Externals.cfg** in your top-level pio_test directory tells
 **checkout_externals** which tag/branch of cime (and possibly other externals)
 that should be brought in to generate your sandbox.
 
@@ -45,13 +41,13 @@ changed** (unless you have already manually updated the relevant
 external(s) to have the correct branch/tag checked out). Common times
 when this is needed are:
 
-* After checking out a new mizuRoute branch/tag
+* After checking out a new pio_test branch/tag
 
-* After merging some other mizuRoute branch/tag into your currently
+* After merging some other pio_test branch/tag into your currently
   checked-out branch
 
 **checkout_externals** must be run from the root of the source
-tree. For example, if you cloned mizuRoute with::
+tree. For example, if you cloned pio_test with::
 
   git clone https://github.com/nmizukami/pio_test.git my_pio_test
 
@@ -65,7 +61,7 @@ To see more details of **checkout_externals**, issue ::
 Customizing your pio_test
 ==================================
 
-There are several use cases to consider when you want to customize or modify your mizuRoute sandbox.
+There are several use cases to consider when you want to customize or modify your pio_test.
 
 Switching to a different pio_test branch or tag
 -------------------------------------------
@@ -79,7 +75,7 @@ you would simply do the following::
   ./manage_externals/checkout_externals
 
 You should **not** use this method if you have made any source code
-changes, or if you have any ongoing mizuRoute simulations that you want
+changes, or if you have any ongoing pio_test runs that you want
 to saze that were created from this sandbox. In these cases, it is often 
 easiest to do a second **git clone**.
 
@@ -118,7 +114,7 @@ After making this change, it's a good idea to commit the change in your
 local CTSM git repository. First create a branch in your local
 repository, then commit it. For example::
 
-  git checkout -b my_mizuRoutebranch
+  git checkout -b my_pio_test_branch
   git add Externals.cfg
   git commit -m "Update CIME to cime5.8.2"
 
